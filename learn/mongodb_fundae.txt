@@ -1,0 +1,307 @@
+npm i mongoose-timestamp
+	for adding createdAt, updatedAt timestamps
+
+cli:
+	mongo --host localhost --port 27017
+basics:
+	show databases
+	use <db>   Note:The mongo shell variable db is set to the current database. So can use db.xyz commands
+	show collections
+
+drop a database:
+  //first select the database and then drop
+  use <db>
+  db.dropDatabase();
+
+find:
+	coll = db.users (users is a collection)
+	db.users.find() : get all users
+  
+projection: get only heading
+  db.news.find({}, {heading : true}).limit(2.3)
+insert:
+	db.users.insert({"name" : "Hardik", "password" : "qwertyui", "admin" : false})
+
+delete:
+  db.sessions.remove({})
+
+commands for mongodb server status, performance assess:
+  db.runCommand({serverStatus :1})
+
+rename collection:
+  db.aadminuser.renameCollection("adminuser")
+
+======= array operations =======
+
+push 23232 to 'qids' array
+  db.array.update({'_id' : ObjectId("56c15d162183ee65d35d207d") }, {'$push' : {'qids' : 23232}})
+
+remove/unset 'quids' field(added this field instead of 'qids')
+  db.array.update({'_id' : ObjectId("56c15d162183ee65d35d207d") }, {'$unset' : {'quids': ""}})
+
+add unique element 23 to 'qids' array
+  db.array.update({'_id' : ObjectId("56c15d162183ee65d35d207d") }, {'$addToSet' : {'qids': 23}})
+
+remove element 23 from 'qids' array
+  db.array.update({'_id' : ObjectId("56c15d162183ee65d35d207d") }, {'$pull' : {'qids': 23}})
+==============
+  Mongodb indexes
+--------------
+Single index
+  db.collection.ensureIndex( { a: 1 }, { unique: true } )
+  db.news.ensureIndex({date : 1})
+  db.news.dropIndex({date : 1}) //drop/remove/delete index
+
+Compund index
+  db.products.createIndex( { item: 1, category: 1, price: 1 } )
+
+Create index in backgroud (by default false)
+  db.people.createIndex( { zipcode: 1}, {background: true} )
+
+Create a spart index
+  db.people.createIndex( { zipcode: 1}, {background: true, sparse: true } )
+
+View indexes on a collection 'news'
+  db.news.getIndexes()
+==============
+  Mongodb query planning - using explain()
+--------------
+  db.collection.find().explain(verbosity) : 
+    verbosity parameter string can be:
+      "queryPlanner" : default shows the winnig plan after running query optimizer
+      "executionStats" : executes the winning plan and returns stats
+      "allPlansExecution" : returns stats describing execution of winning plan as well as 
+        for other candidate plans
+
+  db.news.find({date : new ISODate("2016-02-10"), approved : true}).explain()
+==============
+mongoose
+--------------
+var Tank = mongoose.model('Tank', yourSchema);
+
+var small = new Tank({ size: 'small' });
+small.save(function (err) {
+  if (err) return handleError(err);
+  // saved!
+})
+
+// or
+
+Tank.create({ size: 'small' }, function (err, small) {
+  if (err) return handleError(err);
+  // saved!
+})
+
+-------------------
+update item:
+var conditions = { name: 'borne' }
+  , update = { $inc: { visits: 1 }}
+  , options = { multi: true }
+  , callback = function(err, numAffected)
+
+Model.update(conditions, update, options, callback)
+
+  It updates all documents matching the query.
+  NOTE : although values are casted to appropriate types, following are not applied
+    * defaults
+    * setters
+    * validators
+    * middleware triggered on save
+=====================
+errors mongoose driver
+---------------------
+unable to connect to mongodb
+{"name":"MongoError","message":"no connection available for operation","driver":true}
+---------------------
+=====================
+=====================
+mongo db timeout fundae:
+----------------------
+
+Connection timeout
+The connection timeout value determines the maximum amount of time your driver will wait for a connection to be established with the server.
+
+Socket timeout
+The socket timeout option specifies to your driver how long to wait for responses from the server. This timeout governs all types of requests (queries, writes, commands, authentication, etc.).
+---------------------
+=====================
+=====================
+mongodb as a service or daemon(process)
+---------------------
+
+SERVICE:
+  sudo service mongodb start/stop/restart/status
+  init file : /etc/init/mongodb.conf
+  default config file (as used in init file) : /etc/mongodb.conf
+  /etc/mongodb.conf : 
+    default dbpath=/var/lib/mongodb, 
+    default port=27017
+
+PROCESS:
+  mongod --dbpath /media/N/db/ --port 27018
+  if started mongod process (not as a service) : 
+    default db path=/data/db
+    default port=27017
+
+=====================
+  IMPORTANT mongoose errors new 4.4.2 (old 4.3.7)
+
+  Kerberos error
+
+  use 4.3.7
+
+=====================
+  mongodb upgrade error
+---------------------
+need to upgrade database local with pdfile version 4.22, new version: 4.5
+Tue Feb  2 16:25:04.139 [initandlisten]    Not upgrading, exiting
+Tue Feb  2 16:25:04.139 [initandlisten]    run --upgrade to upgrade dbs, then start again
+
+solution:
+  sudo mongod --dbpath /var/lib/mongodb/ --port 27018 --upgrade
+
+=====================
+  START mongo db backups and restore
+---------------------
+
+dump database named 'Backend'
+  mongodump --host localhost --port 27017 --db Backend --out /tmp/backup
+  
+
+dump only collection named 'sessions' in database 'Backend'
+  mongodump --host localhost --port 27017 --db Backend --collection sessions  --out /tmp/backup
+
+How stored:
+backup_db/
+└── Backend
+    ├── adminusers.bson
+    ├── adminusers.metadata.json
+    ├── sessions.bson
+    ├── sessions.metadata.json
+    └── system.indexes.bson
+
+the dump folder 'backup_db' contains 1 folder for each database (here 'Backend')
+Inside that, 
+  1 '.bson' file for data for each collection
+  1 '.metadata.json' for metadata like indexing, etc for each collection
+  1 system.indexes.bson for whole database
+
+
+restore dumped database 'Backend' to db server running on port 27018 into new database named 'Admin'
+  mongorestore --host localhost --port 27018 --db Admin /tmp/backup/Backend/
+
+---------------------
+=====================
+
+=====================
+  mongo operations errors
+---------------------
+DUPLICATE KEY ERROR : when 'unique' index on a key and insert an entity with duplicate key
+error code = 11000
+  {
+    "code": 11000,
+    "index": 0,
+    "errmsg": "E11000 duplicate key error index: Backend.adminusers.$email_1  dup key: { : \"ashish@trumplab.com\" }",
+    "op": {
+      "password": "pikachu",
+      "role": "uploader",
+      "name": "akki",
+      "email": "ashish@trumplab.com",
+      "_id": "56b0ab4958e2d1fb6a12c226",
+      "createdAt": "2016-02-02T13:12:41.558Z",
+      "__v": 0
+    }
+  }
+
+
+--------------------
+====================
+====================
+  START mongodb DEBUG queries
+--------------------
+METHOD-1 using mongoose in nodejs app
+  mongoose.set('debug', true);
+prints on console like :
+
+  Mongoose: users.insert({ age: 22, name: 'hardik', _id: ObjectId("56b1a7499f3e959a6f4fcc9d"), __v: 0 })   
+  Mongoose: users.findOne({ name: 'hardik' }) { fields: undefined }  
+  Mongoose: users.update({ _id: ObjectId("56b1a727bfb174186eb82b34") }) { '$set': { age: 23 } }
+
+Note :
+* mongoose doesn't save the fields which are not in the schema
+* if a tracked field is overwritten with same value, its not sent in save() call for update
+* to save a mixed field, use 
+  newUser.liked = <value of any type>; //string, number, boolean
+  newUser.markModified('liked'); 
+  newUser.save();
+--------------------
+METHOD-2 start mongod with verbose options
+  sudo mongod --dbpath /var/lib/mongodb/ --port 27018 --logpath ~/tmp/m.log -v
+
+view the log file, grep the statements with "[conn7]" like strings using
+  tail -f -n 200 ~/tmp/m.log  | grep "\[conn"
+
+==================
+  Tranparent hugepages issue
+------------------
+earlier
+$ cat /sys/kernel/mm/transparent_hugepage/enabled 
+[always] madvise never
+
+$ cat /sys/kernel/mm/transparent_hugepage/defrag 
+[always] madvise never
+
+mongo shell on starting outputting following
+  2016-02-04T12:24:59.638+0530 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
+  2016-02-04T12:24:59.638+0530 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
+  2016-02-04T12:24:59.638+0530 I CONTROL  [initandlisten] 
+  2016-02-04T12:24:59.638+0530 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/defrag is 'always'.
+  2016-02-04T12:24:59.638+0530 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
+
+So set them to never
+  echo never | sudo tee /sys/kernel/mm/transparent_hugepage/defrag 
+  echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+  Note use of "tee" as : sudo echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    doesnot work because second command is not sudo
+------------------
+==================
+
+==================
+Basic repl set
+
+Replication is for availability against failures
+Sharding is for performance - by distributing read writes
+------------------
+Atleast 3 members
+odd number of members for elections to proceed smoothly
+
+local setup:
+directories
+  cd /media/N
+  mkdir db
+  cd db
+  mkdir db0
+  mkdir db1
+  mkdir db2
+
+start instances:
+  mongod --port 10000 --dbpath db0 --logpath db0/log.log --replSet dummy  
+  mongod --port 10001 --dbpath db1 --logpath db1/log.log --replSet dummy
+  mongod --port 10002 --dbpath db2 --logpath db2/log.log --replSet dummy
+
+connect to one instance say port 10001
+  mongo --port 10001
+  > rs.initiate()
+  > rs.conf()
+
+Use rs.initiate() on one and only one member of the replica set
+Use rs.conf() to display the replica set configuration object
+Use rs.status() to identify the primary in the replica set
+
+add other members from primary
+  > rs.add("ashish-Inspiron:10000")
+  > rs.add("ashish-Inspiron:10002")
+
+connect to replica set:
+  mongo --host dummy/localhost:10000,localhost:10001,localhost:10002
+

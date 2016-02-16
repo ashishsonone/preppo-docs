@@ -1,0 +1,711 @@
+=================
+	#START gcloud commands
+-----------------
+
+deploy node apps on Google App Engine
+
+In GAE, in each project there are versions of your app modules, 
+one of them is default. Each version has set of auto-managed VMs
+deployed by GAE.
+
+app modules are just like modules within you app, module name is specified 
+in the app.yaml file. If not specified, belongs to "default" module
+
+Each module can have many different versions.
+
+inside the node app src folder, run : 
+	gcloud preview app deploy app.yaml --promote
+this will deploy the node app as a new version
+--promote option will make this version as default
+
+To replace a specific version:
+	gcloud preview app deploy app.yaml --version=20160113t210608
+
+To stop a specific version, i.e remove any of the allocated VMs
+	gcloud preview app modules stop default --version=20160113t210608
+(doc says : It may only be used if the scaling module for your module has been set to manual)
+
+-----------------
+	END gcloud commands
+=================
+
+=================
+	#START GCE manual manage
+-----------------
+ssh
+	ssh -i PRIVATE_KEY_FILE USER@IP_ADDRESS
+	ssh -i ~/.ssh/google_compute_engine ashish@104.197.188.156
+
+need to create a start script with understanding of init.d or systemd so as to run 
+process node as daemon
+
+google Cloud Logging agen needs stdout and stderr sent by supervisor(http://supervisord.org/)
+
+create a instance:
+	gcloud compute instances create ashish-demo-app-instance \
+    --machine-type=g1-small \
+    --image=debian-8 \
+    --scopes userinfo-email,cloud-platform \
+    --metadata-from-file startup-script=gce/startup-script.sh \
+    --zone us-central1-f \
+    --tags http-server
+
+check the progress:
+	gcloud compute instances get-serial-port-output ashish-demo-app-instance --zone us-central1-f
+
+create a firewall rule named 'default-allow-http-8002' to allow 8002 port
+	gcloud compute firewall-rules create default-allow-http-8002 \
+	--allow tcp:8002 \
+	--source-ranges 0.0.0.0/0 \
+	--target-tags http-server \
+	--description "Allow port 8002 for node http server"
+
+see instances list:
+	gcloud compute instances list
+
+visit: <external_ip>:<port> to visit your nodejs running site
+	http://146.148.77.72:8002/books
+
+----------------
+	END GCE manual manage
+================
+
+================
+	#START supervisord 
+----------------
+
+install:
+	sudo apt-get install supervisor
+
+start service:
+	sudo service supervisor start
+
+config file in:
+	/etc/supervisor/conf.d/*.conf
+
+example config file:
+[program:nodehook]
+command=/usr/bin/node /srv/http.js
+directory=/srv
+autostart=true
+autorestart=true
+startretries=3
+stderr_logfile=/var/log/webhook/nodehook.err.log
+stdout_logfile=/var/log/webhook/nodehook.out.log
+user=www-data
+environment=SECRET_PASSPHRASE='this is secret',SECRET_TWO='another secret'
+
+read and reload the config files
+	sudo supervisorctl reread
+	sudo supervisorctl update
+
+check status and get CLI (command line interface)
+	sudo supervisorctl
+
+stop program : in supervisorctl CLI
+	supervisor> stop nodehook
+	nodehook: stopped
+
+start back : in CLI
+	supervisor> start nodehook
+	nodehook: started
+
+Or run the commands directly:
+	supervisorctl stop nodehook
+	supervisorctl start nodehook
+
+-------------------
+	END supervisord
+===================
+
+===================
+	#START datastore using gcloud
+-------------------
+install package:
+	npm install --save gcloud
+
+instantiation usage:
+	var gcloud = require('gcloud');
+	var dataset = gcloud.datastore.dataset({
+		projectId: 'grape-spaceship-123',
+		keyFilename: '/path/to/keyfile.json'   	//not required in global auth (or on GCE instance)
+												// required only for per api basis auth
+	});
+
+concepts:
+	Concept							|Datastore		| Relational database
+	+								+				+
+	Category of object				|Kind			|Table
+	One object						|Entity			|Row
+	Individual data for an object	|Property		|Field
+	Unique ID for an object			|Key			|Primary key
+
+create new:
+	var key = dataset.key('Question'); //incomplete key, here Question is the Kind(i.e category of object)
+    dataset.save(
+		{
+		    key: key,
+		    data: {JSON}
+		},
+		function(err){
+			//callback
+		}
+	);
+	this also updates the key object with the unique complete id.
+
+get:
+	var key = dataset.key(['Question', '1234']);
+	dataset.get(key, 
+		function(err, entity){
+			//callback with entity
+		}
+	);
+		
+	
+directly overwrite the data without fetching:
+	var key = dataset.key(['Question', '1234']);
+	dataset.save(
+		{
+			key : key,
+			data: {NEW JSON}
+		},
+		function(err){
+			//callback
+		}
+	);
+
+note:
+#filter gcloud/datastore/query
+Datastore allows querying on properties. Supported comparison operators are =, <, >, <=, and >=. "Not equal" and IN operators are currently not supported.
+
+-------------------
+	END datastore
+===================
+
+===================
+	#START load testing
+-------------------
+ran on local and GCE instance:
+	siege -t 60s -c300 http://104.199.158.193:8002/api/questions/MCQ
+
+use apache 'ab' tool:
+  ab -c 10 -t 30 http://localhost:8002/v1/admin/
+
+or jmeter
+
+If node app prints 'Killed' and exits, it means that out of memory. look at
+logs in /var/logs/syslog.
+Node application might be using excessive memory and getting killed by the Out-Of-Memory killer.
+Jan 21 11:02:03 master-node kernel: [97594.574053] Out of memory: Kill process 538 (node) score 747 or sacrifice child
+Jan 21 11:02:03 master-node kernel: [97594.582440] Killed process 538 (node) total-vm:1608860kB, anon-rss:449420kB, file-rss:0kB
+
+
+ran both simultaneously on local and GCE slave
+	siege -c100 -t20S http://104.199.158.193:8002/api/questions/MCQ (GCE slave)
+	siege -c50 -t20S http://104.199.158.193:8002/api/questions/MCQ (local)
+
+	transaction rate = 64 + 17
+	concurrency = 65 + 38
+	shortest = 0.24 | 0.87
+	longest = 9.63 | 8.52
+	no failed transactions
+	data = 37 + 6 MB in 20 S
+	throughput = 1.27 + 0.34 MB/s
+-------------------
+	end load testing
+===================
+
+===================
+	START promises and async
+-------------------
+	Promise libraries
+	RSVP module for promise implementation in nodejs apps
+		- new promise
+		- chaining
+		- RSVP.all
+	bluebird
+		- promisify feature
+	Q
+
+	Async:
+		npm async package
+async.parallel({
+    google: function(callback){
+      http.get("http://www.google.com", function(res){
+        console.log("google done");
+        callback(null, res.statusCode);
+      })
+    },
+    yahoo: function(callback){
+      http.get("http://www.yahoo.com", function(res){
+        console.log("yahoo done");
+        callback(null, res.statusCode);
+      })    
+    }
+  },
+  function(err, results) {
+    if(!err){
+      console.log("all done");
+      console.log(results.google);
+      console.log(results.yahoo);
+    }else{
+      console.log(err);
+    }
+  }
+);
+
+async.waterfall to pass data from one to another : getuser -> getShoppingCart -> calculateTotalAmount
+
+waterfall(tasks, [callback])
+Runs the tasks array of functions in series, each passing their results to the next in the array. However, if any of the tasks pass an error to their own callback, the next function is not executed, and the main callback is immediately called with the error.
+-------------------
+	END promises and async
+===================
+
+===================
+	#START HTTP calls in node.js
+-------------------
+var options = {
+  host: url,
+  port: 80,
+  path: '/resource?id=foo&bar=baz',
+  method: 'POST'
+};
+
+http.request(options, function(res) {
+  console.log('STATUS: ' + res.statusCode);
+  console.log('HEADERS: ' + JSON.stringify(res.headers));
+  res.setEncoding('utf8');
+  res.on('data', function (chunk) {
+    console.log('BODY: ' + chunk);
+  });
+}).end();
+
+--------------------
+	END HTTP calls in node.js
+====================
+
+====================
+  #START GCE Backend services
+--------------------
+list
+  gcloud compute backend-services list
+
+delete an unused backend service
+  gcloud compute backend-services delete dummy-slave-bs
+
+====================
+	#START load balancing in google cloud
+--------------------
+add instance group as 'backend' to a backend service(since web console dropdown doesn't show the instance groups list properly)
+ 	gcloud compute backend-services add-backend dummy-load-balancer-backend-service --instance-group instance-group-slave
+
+
+steps:
+	* put instances in different instance-groups(e.g master in group-dummy-master, slave in group-dummy-slave)
+	* get an reserved ip address[Networking => External IP Address]
+	* create a health check e.g : endpoint '/health', port '8002', protocol 'http' [Compute Engine => Health checks]
+	* create a load balancer [Networking => HTTP load balancing]. Inside it
+		- add a global forwarding rule(say Ext-IP : 8080)
+		- add a 'backend service'(say dummy-service)
+		- inside the backend service add backends. Each backend is simply a instance-group along with utilization parameters.
+			'backend service' will distribute traffic among backends i.e our dummy-service will distribute between group-dummy-master and group-dummy-slave
+		- create host and path rules [towards right of backend services panel]
+			It is simply url-map that load balancer will use to direct traffic to different backend services according to url patters. There is a default backend service which will receive all unmatched urls
+			We can specify say if we want '/video' endpoint to be received by another backend. So now '/home', '/dashboard', etc will all to the default backend service.  '/video' will go to the new backend
+
+	And we're done. Now all requests to <External-IP>:8080 will be received by the default backend service(provide there is only one url-map rule which is the default)
+
+--------------------
+	END load balancing
+====================
+
+====================
+	#START db considerations
+--------------------
+mongodb $text search
+	Using MongoDB full-text search, you can define a text index on any field in the document whose value is a string or an array of strings. When we create a text index on a field, MongoDB tokenizes and stems the indexed field’s text content, and sets up the indexes accordingly.
+
+apache lucene (full text search engine library)
+
+apache solr (platform built on Apache Lucene - powers duckduckgo)
+elastic search (based on lucene, couchbase integration available)
+
+Apache Cassandra (distributed database, masterless "ring" design, powers instagram)
+
+--------------------
+
+couchbase (distributed document database) : powers ebay, linkedin, paypal
+http://www.couchbase.com/use-cases
+claims by couchbase: 
+Couchbase vs. Cassandra
+	Couchbase Delivers 6x Better Price / Performance than Cassandra
+Couchbase vs. MongoDB
+	Couchbase 4.5x Faster than MongoDB with Wired Tiger Storage Engine
+Couchbase : text search : secondary indexes vs full-text search(integrates with elasticsearch, full text search engine, docs are replicated in real time to elastic search)
+----------------------
+Three things you should never put in your database:
+	* images, files, binary data
+
+	* Ephemeral data : usage stats, metrics, gps locations, session data
+		anything that is useful for a short period of time
+		or changes frequently
+		use redis, riak, etc
+	
+	* logs Storing your logs in a database isn't a HORRIBLE idea, but storing them in the same database as your other production data is.
+		Instead use something like Splunk, Loggly or plain old rotating flat files for your logs.
+----------------------
+
+types of NoSQL DBS (source : https://www.thoughtworks.com/insights/blog/nosql-databases-overview)
+	key-value dbs :
+		- values are not examinable 
+		- generally useful for storing session information, user profiles, preferences, shopping cart data. 
+		- e.g riak, redis, memcached, amazon dynamodb, voldemort, couchbase
+
+	document dbs:
+		- value is examinable
+		- generally useful for content management systems, blogging platforms, web analytics, real-time analytics, ecommerce-applications
+		-  avoid using document databases for systems that need complex transactions spanning multiple operations or queries against varying aggregate structures.
+		- e.g mongodb, couchdb, etc
+
+	column family stores : 
+		- generally useful for content management systems, blogging platforms, maintaining counters, expiring usage, heavy write volume such as log aggregation.
+		- avoid for systems that are in early development, changing query patterns
+		- e.g cassandra, hbase, hypertable, amazon dynamodb
+
+	graph databases:
+		-
+		-
+
+
+=====================
+	#START mongodb usage
+---------------------
+
+find certain portion of array element in a document
+	db.posts.find( {}, { comments: { $slice: [ 20, 10 ] } } )
+
+---------------------
+=====================
+
+=====================
+  #START nodemailer
+---------------------
+  
+How to use gmail account as sender in nodemailer
+  http://nodemailer.com/using-gmail/
+  
+var nodemailer = require('nodemailer');
+
+// create reusable transporter object using the default SMTP transport
+var transporter = nodemailer.createTransport('smtps://ashish@trumplab.com:password@smtp.gmail.com');
+
+// setup e-mail data with unicode symbols
+var mailOptions = {
+    from: 'ashish@trumplab.com', // sender address
+    to: 'ashish@trumplab.com', // list of receivers
+    subject: 'Hello', // Subject line
+    text: 'Hello world', // plaintext body
+    html: 'Hello world' // html body
+};
+
+// send mail with defined transport object
+transporter.sendMail(mailOptions, function(error, info){
+    if(error){
+        return console.log(error);
+    }
+    console.log('Message sent: ' + info.response);
+});
+---------------------
+  END nodemailer
+=====================
+
+====================
+  #START curl usage
+--------------------
+  curl http://ec2-52-26-56-243.us-west-2.compute.amazonaws.com/ -k -w %{time_connect}:%{time_starttransfer}:%{time_total}
+--------------------
+====================
+
+===================
+  #START fb verification
+-------------------
+https://graph.facebook.com/debug_token?input_token=xyz&access_token=<acc_tok>
+
+where
+<acc_tok>=<api_key>|<api_secret>
+
+
+https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#checktoken
+
+https://graph.facebook.com/debug_token?input_token=CAAJyZC1ZAcVKUBAIWLxzBkEx6ejnVZAguqfA1Rxfto6bIIafkrjxTGlQoW46OmNxdZCKNZA8cAs3mPO0QG3ZC22sUxncziDePfoyMsOPj90CgqZCNROpy7QqaPpSiOkHs5K8Gws2ZAiKb0Ubx4y1oQGjhpYpOfZBGMuXJjEjImIi10zAWcZChcvAsQzIM7ZB2feYsqBLFdgRVet2gZDZD&access_token=689390944539813|2e41dcb72074367ca78b472c6ce6ba42
+
+{
+  data: {
+    app_id: "689390944539813",
+    application: "Knit",
+    expires_at: 1455084000,
+    is_valid: true,
+    scopes: [
+      "email",
+      "public_profile"
+    ],
+    user_id: "878194745606515"
+  }
+}
+
+check that app_id is yours. 
+
+-----------
+
+get profile photo from access_token
+https://graph.facebook.com/me/picture?access_token=CAAJyZC1ZAcVKUBAIWLxzBkEx6ejnVZAguqfA1Rxfto6bIIafkrjxTGlQoW46OmNxdZCKNZA8cAs3mPO0QG3ZC22sUxncziDePfoyMsOPj90CgqZCNROpy7QqaPpSiOkHs5K8Gws2ZAiKb0Ubx4y1oQGjhpYpOfZBGMuXJjEjImIi10zAWcZChcvAsQzIM7ZB2feYsqBLFdgRVet2gZDZD&redirect=0&type=normal
+
+{
+  data: {
+    is_silhouette: false,
+    url: "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xfa1/v/t1.0-1/p100x100/11898902_892585687500754_4795571596917356163_n.jpg?oh=171540060d14f301b4f7a129d85b5b2f&oe=572FE304&__gda__=1466750605_ebc29dc398f50f3cf49e2b27118220f2"
+  }
+}
+
+----------
+Or simply use the access token to get user info including name, email, id
+for login : only id is used to look up in the db
+for signup : use the info to create a new user
+
+So user table will have
+  username : phone or google id or fb id
+  email : ?? (optional)
+  phone : ?? (optional)
+  name :
+
+https://graph.facebook.com/me/?fields=name,email,id&access_token=CAAJyZC1ZAcVKUBAIWLxzBkEx6ejnVZAguqfA1Rxfto6bIIafkrjxTGlQoW46OmNxdZCKNZA8cAs3mPO0QG3ZC22sUxncziDePfoyMsOPj90CgqZCNROpy7QqaPpSiOkHs5K8Gws2ZAiKb0Ubx4y1oQGjhpYpOfZBGMuXJjEjImIi10zAWcZChcvAsQzIM7ZB2feYsqBLFdgRVet2gZDZD&redirect=0&type=normal
+
+{
+  name: "Ashish Sonone",
+  email: "ashson07@gmail.com",
+  id: "878194745606515"
+}
+
+fields : 
+  name
+  email
+  id
+  gender
+
+------------------
+  END fb
+==================
+==================
+  #START AJAX query on browser console
+------------------
+GET request (with cookies)
+
+$.ajax({
+    type: "GET", 
+    url: "https://dev.api.preppo.in/v1/admin/users", 
+    xhrFields: {
+      withCredentials: true
+    }
+});
+
+xhrFields.withCredentials is to send cookies in case of CORS request i.e request to a different domain server. By default, cookies are not sent
+
+
+------------------
+
+POST request (with data)
+
+$.ajax({
+    type: "POST", 
+    url: "http://localhost:8999/login", 
+    data : {"email" : "hardik@trumplab.com", "password" : "kuchbhi"}
+});
+
+------------------
+
+GET request (with custom headers)
+
+$.ajax({
+    type: "GET", 
+    url: "http://localhost:8999/secure/me", 
+    headers: {"x-session-token" : 1455221875888}
+});
+
+no xhrFields required
+------------------
+==================
+
+==================
+  #GOOGLE CLOUD STORAGE : upload/download from browser
+------------------
+
+BROWSER API KEY : AIzaSyDIZtrLB6tswr4x0PxiB8ozGaz4q_3NNuw
+GET http://storage.googleapis.com/<bucket-name>/path/to/object
+
+e.g
+bucket : node-1189
+path : 14527662644292pushes.png
+public : true
+GET http://storage.googleapis.com/node-1189/14527662644292pushes.png
+
+path : 1452766192030arrow.svg
+public : false
+http://storage.googleapis.com/node-1189/1452766192030arrow.svg?key=AIzaSyDIZtrLB6tswr4x0PxiB8ozGaz4q_3NNuw
+DOES NOT WORK
+
+CREATE A TEMPORARY SIGNED URL for GET for private resource
+gsutil signurl -d 10m /home/ashish/Documents/node-8b730f95b44d.json gs://vm-containers.node-1189.appspot.com/butterfly.gif
+
+-----------------
+
+NPM package for signing url in Node.json
+  https://www.npmjs.com/package/gcs-signed-urls
+
+it works -- yay. But understand how to use acl to it
+
+Note : it uses signed policy documents and NOT signed urls
+A policy document is constructed in JavaScript Object Notation (JSON) and contains the following sections: 
+{
+  expiration : 
+  conditions : 
+}
+
+The conditions section must include a condition statement for every field in your HTML form except the GoogleAccessId
+
+------------------
+Trying out a post request
+
+gsutil signurl -m PUT -d 10m /home/ashish/Documents/node-8b730f95b44d.json gs://vm-containers.node-1189.appspot.com/butterfly-2.gif
+
+https://storage.googleapis.com/vm-containers.node-1189.appspot.com/butterfly-2.gif?GoogleAccessId=temporary@node-1189.iam.gserviceaccount.com&Expires=1455295742&Signature=EZPz%2BXnpzaIT0CaN7H38HhjC0INxCUGMQuV8i8ZwKxe6XogHNPP24Gn1KkdvsUNsPRApNeJFXkKrfdQmucieWQFJ0wNs2r%2BKgd9OXYu3JFBBETMUCA%2BH473mfGz8Gh4%2BQdy1lY%2Be%2B7Zul9k%2F95CxMaPadd59JHarcvU7SsH5n0nAzaVog%2BX%2BI9CMvbqNqFEpCdiARGi%2FR3c4rCHV%2Bt1%2FFfVH5Q96ulmhW9KpT0Bb4BQOyAM%2BakvxhGl2HTmvs8EwG4p7UorRR1fPSzggsxG64flvU7PukaOc5ikPedKVd%2Bp1eO0fwVgC7He5Kb2fhZCy%2FHZfMjlQCvKUszltiHJOhg%3D%3D
+
+doesnot work : not POST request, it should be a put request. And must use form fields. Cannot use query parameters
+
+--------------------
+ACL find out what this does
+
+publicReadWrite public-read-write Gives the bucket owner OWNER permission and gives all users, both authenticated and anonymous, READER and WRITER permission. This ACL applies only to buckets. When you apply this to a bucket, anyone on the Internet can list, create, overwrite and delete objects without authenticating. 
+
+Important: Setting a bucket to publicReadWrite will allow anyone on the Internet to upload.
+------------------
+
+Can use a service account to upload into any bucket
+
+------------------
+Set bucket ACL permissions
+gsutil acl set public-read-write gs://public-node-1189
+
+Set default object permissions
+gsutil defacl set public-read gs://public-node-1189
+
+------------------
+Set up CORS google cloud storage bucket
+https://cloud.google.com/storage/docs/cross-origin
+
+Where cors-json-file.json contains:
+[
+    {
+      "origin": ["*"],
+      "responseHeader": ["Content-Type"],
+      "method": ["GET", "PUT", "POST"],
+      "maxAgeSeconds": 3600
+    }
+]
+
+$ gsutil cors set cors.json gs://public-node-1189
+
+Get cors config on bucket public-node-1189
+$ gsutil cors get gs://public-node-1189
+
+------------------
+  END GOOGLE CLOUD STORAGE
+==================
+
+==================
+  START persistent disks 
+------------------
+  create a disk on web named 'disk-1'
+
+$ gcloud compute disks list
+NAME        ZONE         SIZE_GB TYPE        STATUS
+disk-1      asia-east1-c 50      pd-ssd      READY
+master-node asia-east1-c 10      pd-standard READY
+slave-node  asia-east1-c 10      pd-standard READY
+
+Attach it
+  gcloud compute instances attach-disk master-node --disk disk-1
+
+SSH into the instance:
+$ ls -l /dev/disk/by-id
+total 0
+lrwxrwxrwx 1 root root  9 Feb  6 16:30 google-master-node -> ../../sda
+lrwxrwxrwx 1 root root 10 Feb  6 16:30 google-master-node-part1 -> ../../sda1
+lrwxrwxrwx 1 root root  9 Feb 16 07:04 google-persistent-disk-1 -> ../../sdb
+lrwxrwxrwx 1 root root  9 Feb  6 16:30 scsi-0Google_PersistentDisk_master-node -> ../../sda
+lrwxrwxrwx 1 root root 10 Feb  6 16:30 scsi-0Google_PersistentDisk_master-node-part1 -> ../../sda1
+lrwxrwxrwx 1 root root  9 Feb 16 07:04 scsi-0Google_PersistentDisk_persistent-disk-1 -> ../../sdb
+
+look at the third entry 'google-persistend-disk-1' pointing to /dev/sdb i.e another disk
+$ DISK_LOCATION=/dev/disk/by-id/google-persistent-disk-1
+
+(ONLY ONCE, IF REUSING EXISTING DISK DON'T DO FOLLOWING)
+Now format it using 'sudo mkfs.ext4 -F $DISK_LOCATION'
+$ sudo mkfs.ext4 -F $DISK_LOCATION
+
+Now create a directory for mount point
+$ MOUNT_POINT=/mongo
+$ sudo mkdir /mongo
+
+Now mount the disk there using 'sudo mount -o discard,defaults DISK_LOCATION MOUNT_POINT'
+$ sudo mount -o discard,defaults $DISK_LOCATION $MOUNT_POINT
+
+------------------
+Detach a disk
+$ gcloud compute instances detach-disk  instance-1 --disk mongo-disk-2
+------------------
+==================
+
+==================
+  START create an image from boot disk
+------------------
+Create a VM named 'master-node'. 
+boot disk also gets named 'master-node'. 
+Install everything and configure it to make it ready to be used as 'image'
+
+Set the auto-delete state of the root persistent disk to false
+
+Delete the instance 'master-node'
+
+Note : mounting of external disks, as in case of mongodb server, must be done manually after VM is recreated using this image since disk ids will be different for different instances
+
+Create the image using this disk 'master-node'
+Image named : mongo-v1-image
+
+------------------
+
+Using this custom image 'mongo-v1-image' to create a new VM instance
+
+Select zone : asia-east1-c
+Allow HTTPS, HTTP traffic
+Uncheck 'Allow API access to all Google Cloud Services'
+In 'Disks' column, uncheck 'Delete boot disk when instance is deleted'
+
+------------------
+==================
+  START using gcloud with multiple accounts and projects
+------------------
+to login with new account
+$ gcloud auth login
+
+to see active configuration:
+$ gcloud config list
+
+To set default account
+$ gcloud config set account ashish@preppo.in
+
+To set default project
+$ gcloud config set project preppo-1223
+
+------------------
+==================
