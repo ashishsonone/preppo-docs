@@ -1,0 +1,55 @@
+Concern: do we need another table to store quiz details. How we will know at client side which quizzes are available as list.
+  
+  Quiz : store meta data about quiz
+  QuizQuestions : store question content
+
+  Use Quiz table to fetch list of quizzes.
+  Then when enter a quiz, fetch all of its questions
+
+Option 1:
+  Quiz will just store the 
+    type of quiz : weekly, daily, monthly
+    its id
+    publishDate
+    admin stuff
+
+  QuizQuestion will contain:
+    actual content
+    level
+    quizId or quizIds (foreign key to Quiz)
+    admin stuff
+    NO : publishDate (X)
+
+  Work ?
+    fetch recent quiz list by publishDate
+    To get questions for a quiz, use its quizId to query QuizQuestion to fetch all questions with quizId = <quizId>
+
+  Pros/Cons
+    (+) Since questions indexed by quizId, it will be a scan of the quizId index and then documents will be retrieved in one pass
+    (-) question's reusability is reduced since question should be independent of the quiz
+    (+) deleting/publishing/unpublishing a question is easy just 1 update query => And it will also automatically affect the Quiz itself. So any question can be taken down immediately
+
+Option 2:
+  Quiz will store:
+    type : weekly, daily, monthly
+    its id
+    publishDate
+    admin stuff
+    questionIds -> array : this will be used to fetch the questions for this quiz
+
+  QuizQuestion will store:
+    actual content
+    level
+    admin stuff
+    NO : publishDate(X) or quizId (X)
+
+  Work ?
+    fetch recent quiz list by publishDate
+    To get questions for a quiz, the list of quizIds to get the questions by using 
+      {_id : {'$in' : questionIds }}
+
+  Pros/Cons
+    (+) Independed question bank. Can be reused a number of times since only content is stored in QuizQuestion. No other stuff
+    (-) Fetching questions will be N searches in the index of QuizQuestion
+    (-) deleting/publishing/unpublishing a question means removing it from all the quizzes which contain it also
+    (+) once questions are created, creating a new quiz is straightforward - pick question - but how will the questions be picked

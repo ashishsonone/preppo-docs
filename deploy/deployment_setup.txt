@@ -1,0 +1,46 @@
+conventions:
+    machine(and hence boot disk) names : dev-mongo-1
+    db disk names : dev-mongo-1-data
+    boot image names : mongo-boot-image-v1 (no 'dev' prefix as it is to be used by everyone)
+    db snapshot names : dev-mongo-1-data-snapshot-v1 (db disk name as prefix)
+
+    For production : use 'prod-' prefix everywhere instead of 'dev-'
+
+mongodb checklist:
+    + ulimit -n
+    + disable transparent hugepages
+    + use ssds
+    swap enable *
+    + seperate logs and data/journal into different storage
+
+steps for mongodb setup:
+    create ubuntu 14.04 VM with 10 GB boot disk (with unchecked delete disk on instance deletion)
+    VM name : dev-mongo-1 (auto set by GCE boot disk name : dev-mongo-1)
+    Install and setup mongodb with supervisor, mongodb user and above checklist
+    Create another disk (SSD) for data : 'dev-mongo-1-data' - 50 GB
+    attach it to 'dev-mongo', format it
+    Mount it at '/mongo' . 
+    Configure supervisor mongodb init script to use /mongo/db as dbpath
+
+Create mongo boot image:
+    Check mongodb is working
+    create a dummy database, insert some values.
+    Now delete the instance 'dev-mongo'.
+    Create image from boot disk 'dev-mongo-1'
+    Image name : 'mongo-boot-image'
+    Delete 'dev-mongo-1' disk
+    Now we have just image 'mongo-boot-image' and data disk 'dev-mongo-1-data-disk
+    
+Use image:
+    Create VM with 'mongo-boot-image'
+    attach & mount the disk 'dev-mongo-1-data-disk' @ '/mongo' (DONOT format)
+    See if everything works as expected
+
+-------------------
+    Try mongodb data disk snapshots using fsync and temporarily stopping the write to disk
+
+-------------------
+    Node server see how config will be stored, git ignored
+    Whether to use different branches or different repos for development and production
+
+    

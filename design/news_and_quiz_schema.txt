@@ -1,0 +1,104 @@
+
+====== DESIGN DOC FOR NEWS AND NEWS-QUIZ =======
+
+In general each collection/table will contain following admin-related columns for internal use:
+  status : current state of the entity. It can be one of [uploaded, approved, published]
+  editedBy : editor email
+  editedAt : time of last action by editor
+  uploadedBy : uploaded email who uploaded the content
+  uploadedAt : upload time i.e entity creation time
+
+Note:
+> Once uploaded, uploader cannot edit the entity.
+> editor can edit the entity and also change its status to approved or published
+> In the schema that follows: [XYZ] means an array of 'XYZ' type objects.
+> Item labeled *-Schema is not a table. Its just a representation/name for a complex data type used within the table schema
+> Item labeled *-Table are the actual tables/collections that will be in the database
+> comments enclosed between ??? .... ??? are the food for thought - i.e need input about
+
+-------------------------------
+Content-Schema : {
+  heading : String,
+  points : [String]
+}
+
+News-Table {
+  //metadata
+  publishDate : Date,
+  categories : [String],
+  tags : [String],
+
+  //content
+  content : {
+    english : Content-Schema,
+    hindi : Content-Schema
+  }
+
+  //admin-related stuff
+  status: String, // one of [uploaded, approved, published]
+  editedBy : String,
+  editedAt : Date,
+
+  uploadedBy : String,
+  uploadedAt : Date
+}
+
+-----------------------------
+
+NewsQuiz-Table{
+  //metadata
+  publishDate : Date,
+  type : String - can be [weekly, daily, monthly]
+  nickname : String - e.g "week-1-jun-2016"
+
+  //content
+  questionIds : [String] - foreign keys to NewsQuizQuestion
+
+  //same admin-related stuff
+}
+
+----------------------------
+
+Option-Schema {
+  optionString : String,
+  correct : Boolean, - defaults to false
+}
+
+Question-Schema {
+  language : String,
+  questionString : String,
+  options : [Option-Schema],
+  explanation : String - ??? do we need this for news quiz ???
+}
+
+NewsQuizQuestion-Table{
+  content : {
+    english : Question-Schema,
+    hindi : Question-Schema
+  }
+  level : Number, //hardness define in some scale say [1-10]
+
+  count : Number, //how many times its been used in some quiz
+  //same admin-related stuff
+  //only the status column can be one of [uploaded, approved]
+  //No 'published' state as it is captured by publishing of NewsQuiz
+}
+
+Note:
+  In this db design, we can't tell by looking at a question how many times it has been used or in which quiz it was used. So when selecting questions for a quiz, we will not have this information - to preventing its repetition
+Solution:
+  Store just a count for each question as in how many times it has been used. If need detail on in which quizzes it has been used - we can do 'contains' query in the quiz table on 'questionIds' column
+
+----------------------------
+FOR SUBJECT QUIZZES
+
+- For tagging Subject quizzes have a 'tags' column in the Question schema.
+  A 'tag' will have follwing format
+  <ExamCode>-<SubjectCode>-<ChapterCode>-<Topic-Code>
+
+  e.g SBIPO-APT-REA-REL for sbi po exam, aptitute subject, reasoning chapter, blood-relations topic
+  
+- a question can have multiple such tags if it can be used in multiple exams
+
+- prefix search can be done on index on the 'tags' column
+  e.g get all the questions for 'SBIPO-APT' i.e aptitude subject for sbi po exams

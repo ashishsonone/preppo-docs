@@ -1,0 +1,26 @@
+how to create a public bucket
+------------------
+
+create a bucket 'public-dev-preppo' from console
+
+Set bucket ACL permissions
+$ gsutil acl set public-read-write gs://public-dev-preppo
+
+Set default object permissions
+$ gsutil defacl set public-read gs://public-dev-preppo
+
+Create cors.json with content:
+[
+    {
+      "origin": ["*"],
+      "responseHeader": ["Content-Type"],
+      "method": ["GET", "PUT", "POST"],
+      "maxAgeSeconds": 3600
+    }
+]
+
+Set cors config on the bucket
+$ gsutil cors set cors.json gs://public-dev-preppo
+
+Verify cors config
+$ gsutil cors get gs://public-dev-preppo
