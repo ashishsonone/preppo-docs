@@ -61,4 +61,4 @@
 - utility function for checking id, admin permissions etc and use it every where
 - solve mongo error transparent_hugepage
 - see how limit works
-- cloud logging agent
+- cloud logging agent - google logs
