@@ -27,6 +27,9 @@ clone the repo
 git clone https://github.com/ashishsonone/preppo-backend.git
 set up config - db url, etc
 
+db url is like 'mongodb://dev-mongo-1:27017/preppo'
+preppo is the name of the database
+
 ------------
 create a firewall rule for whole project - inside any of VM's details (Only once across the project)
 edit the 'default' network:

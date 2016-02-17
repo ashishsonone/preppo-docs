@@ -1,0 +1,53 @@
+Once we have our backend node instance up and running independently, we need to create an instance group which can be used in load balancer's backend service.
+
+Note : remember to set http port as 8002 in instance group configuration
+---------
+
+Create instance group
+  'dev-node-group'
+  Use existing instances : dev-node-1, dev-node-2 to add to the group
+
+Now edit the instance group configuration:
+  Click on : Specify port name mapping
+    create port name mapping "http : 8002"
+
+--------
+Create a health check
+  name : 'basic-health-check'
+  protocol : http
+  port : 8002
+  path : /health
+Leave rest to defaults
+
+--------
+Create a load balancer
+  name : dev-load-balancer
+
+Obtain(from godaddy) or Create a self-signed ssl certificate as given in ssl_certificate_gce.txt
+  create ssl certificate resource on Google Cloud using gcloud command
+
+Add a global forwarding rule
+  name : dev-api-preppo
+  ip : as ephemeral (for development), choose static ip for production
+  use : HTTPS, 443,
+  choose the ssl resource just created above
+
+Create a backend service
+  name : <default>
+  protocol : http
+  port-name : http (which in our instance group maps to 8002 - yay)
+  timeout : 20 seconds
+  for the backend:
+    select the instance group created earlier
+    leave everything else to default
+  for health-check:
+    select 'basic-health-check' which hits on 8002 port (verify this)
+
+Create Host and path rules
+  Leave it to default settings, i.e any unmatched requests should go to above backend service
+  save
+
+Now Load Balancer should show 2 (or whatever number of) healthy instances.
+We're done
+
+try accessing the 
