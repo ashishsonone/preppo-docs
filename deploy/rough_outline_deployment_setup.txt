@@ -44,3 +44,32 @@ Use image:
     Whether to use different branches or different repos for development and production
 
     
+-------------------
+Node backend server
+
+Convention:
+    machine (and boot disk) : dev-node-1
+    boot disk image : node-boot-image
+
+    For production - use 'prod-' prefix
+
+checklist:
+    ulimit 
+
+steps:
+    create VM with 10 GB boot disk
+    VM name : dev-node-1
+    install git, tree
+    Install and setup node at /opt/node,
+    Install supervisor
+    git pull the preppo-backend code and set it up with the already existing mongodb server
+    create supervisor script for node
+    create bin/scripts/ directory for utility scripts like node_kill.sh, git_pull.sh and chmod 755 them
+    restart and see everything is working
+
+Create an image:
+    Delete the VM (without deleting the boot disk)
+    Create boot image for the node server from that boot disk
+    image name : node-boot-image
+
+    create another VM from this boot image and see its working as expected

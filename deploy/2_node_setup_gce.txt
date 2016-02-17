@@ -1,0 +1,83 @@
+get node for ubuntu 14.04
+
+mkdir Downloads
+cd Downloads
+wget https://nodejs.org/dist/v5.6.0/node-v5.6.0-linux-x64.tar.xz
+tar xf node-v5.6.0-linux-x64.tar.xz
+
+sudo mkdir /opt/node-v5.6.0
+sudo mv node-v5.6.0-linux-x64/* /opt/node-v5.6.0/
+
+sudo ln -s /opt/node-v5.6.0/bin/node /usr/bin/node
+sudo ln -s /opt/node-v5.6.0/bin/npm /usr/bin/npm
+
+-------------
+create node user
+
+sudo useradd node -M
+
+-------------
+Install utilities
+sudo apt-get install supervisor
+sudo apt-get install git
+sudo apt-get install tree
+
+------------
+clone the repo
+git clone https://github.com/ashishsonone/preppo-backend.git
+set up config - db url, etc
+
+------------
+create a firewall rule for whole project - inside any of VM's details (Only once across the project)
+edit the 'default' network:
+Add firewall rule:
+  name : default-allow-http-8002
+  source : 0.0.0.0/0
+  allowed protocols/ports : tcp:8002
+  target tags : http-server
+
+Now the node server will be accessible from outside external ip
+-------------
+Create another VM : named 'manager'. This will host the repository for cloud instances
+clone a bare repo.
+
+Now generate ssh key for current VM, add it to manager's authorized keys.
+
+Now since we are going to make an image out of current VM. Hence this setup is not to be done everytime, 
+since all instances from that image will have same ssh key and hence are automatically authorized
+
+-------------
+
+Setup supervisor for node - /etc/supervisor/conf.d/node.conf
+
+[program:node]
+command=node /home/ashish/preppo-backend/cluster.js
+directory=/home/ashish/preppo-backend
+autostart=true
+autorestart=true
+startretries=3
+stderr_logfile=/home/ashish/preppo-backend/logs/nodehook.err.log
+stdout_logfile=/home/ashish/preppo-backend/logs/nodehook.out.log
+user=node
+environment=SECRET_PASSPHRASE='this is secret',SECRET_TWO='another secret'
+
+sudo supervisorctl
+> reread
+> update
+> status
+-------------
+set ulimits in /etc/security/limits.conf as done for mongodb
+-------------
+
+restart to see if everything works
+
+========= use the image =============
+Just create a VM using the image, and it will be up and running
+Since the code might have been updated:
+  ssh to instance
+  git pull
+  npm install
+  move new scripts to ~/bin/scripts
+  sudo supervisor restart node (so that even cluster.js reflects the changes)
+
+  Check if its all working smoothly
