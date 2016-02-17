@@ -707,5 +707,11 @@ $ gcloud config set account ashish@preppo.in
 To set default project
 $ gcloud config set project preppo-1223
 
+To ssh to instance in different zone : say default setting is asia-east1c
+$ gcloud compute ssh dev-node-1 --zone europe-west1-c
+
+To set default zone and region
+usage : gcloud config set  SECTION/PROPERTY  VALUE [optional flags]
+$ gcloud config set compute/zone europe-west1-c
 ------------------
 ==================

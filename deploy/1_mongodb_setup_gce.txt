@@ -89,7 +89,7 @@ cat /sys/kernel/mm/transparent_hugepage/enabled
 cat /sys/kernel/mm/transparent_hugepage/defrag
 ------------------
 
-NOTE: Need to do this for each new instance that is created from the image
+NOTE: MUST NEED to do this for each new instance that is created from the image
 
 attach data disk once to the VM instance
 
@@ -102,3 +102,7 @@ UUID=d28e48c8-b7ca-4299-b8c6-f1025f020767 /mongo   ext4 defaults  0 0
 To find the uuid, use 
 $ ls -l /dev/disk/by-uuid
 look at the uuid which corresponds to sdb (assuming only 1 additional disk, otherwise it could be sdc, etc)
+
+Now remount all
+$ sudo mount -a
+
