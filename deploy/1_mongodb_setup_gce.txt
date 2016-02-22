@@ -92,6 +92,7 @@ cat /sys/kernel/mm/transparent_hugepage/defrag
 NOTE: MUST NEED to do this for each new instance that is created from the image
 
 attach data disk once to the VM instance
+mount it once(so that we can find its uuid later)
 
 to mount data disk automatically on reboot
 

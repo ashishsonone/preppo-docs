@@ -62,3 +62,5 @@
 - solve mongo error transparent_hugepage
 - see how limit works
 - cloud logging agent - google logs
+- equation from docx store : mathml or latex
+- use mandrill for mail sending

@@ -1,0 +1,13 @@
+http://enterprise.smsgupshup.com/GatewayAPI/rest?method=SendMessage&send_to=918976208510&msg=Welcome%20to%20SMS%20GupShup%20API&msg_type=TEXT&userid=2000133095&auth_scheme=plain&password=wdq6tyUzP&v=1.1&format=text
+
+GET http://enterprise.smsgupshup.com/GatewayAPI/rest
+params:
+  method = SendMessage
+  send_to = 918976208510
+  msg = Welcome to Karachi (url encoded)
+  msg_type = TEXT
+  auth_scheme = plain
+  userid = 2000133095
+  password = wdq6tyUzP
+  v = 1.1
+  format = text
