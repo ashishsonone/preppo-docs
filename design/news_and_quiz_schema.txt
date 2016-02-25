@@ -4,9 +4,9 @@
 In general each collection/table will contain following admin-related columns for internal use:
   status : current state of the entity. It can be one of [uploaded, approved, published]
   editedBy : editor email
-  editedAt : time of last action by editor
+  updatedAt : time of last action by editor
   uploadedBy : uploaded email who uploaded the content
-  uploadedAt : upload time i.e entity creation time
+  createdAt : upload time i.e entity creation time
 
 Note:
 > Once uploaded, uploader cannot edit the entity.
@@ -37,10 +37,10 @@ News-Table {
   //admin-related stuff
   status: String, // one of [uploaded, approved, published]
   editedBy : String,
-  editedAt : Date,
+  updatedAt : Date,
 
   uploadedBy : String,
-  uploadedAt : Date
+  createdAt : Date
 }
 
 -----------------------------

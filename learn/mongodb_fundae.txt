@@ -64,6 +64,19 @@ Create a spart index
 View indexes on a collection 'news'
   db.news.getIndexes()
 ==============
+==============
+  Mongo db rename field names(e.g editedAt to updatedAt)
+--------------
+  db.news.update({}, {$rename:{"editedAt":"updatedAt"}}, {upsert : false, multi : true});
+  db.news.update({}, {$rename:{"uploadedAt":"createdAt"}}, {upsert : false, multi : true});
+
+  db.news_quiz.update({}, {$rename:{"editedAt":"updatedAt"}}, {upsert : false, multi : true});
+  db.news_quiz.update({}, {$rename:{"uploadedAt":"createdAt"}}, {upsert : false, multi : true});
+  
+  db.news_quiz_question.update({}, {$rename:{"editedAt":"updatedAt"}}, {upsert : false, multi : true});
+  db.news_quiz_question.update({}, {$rename:{"uploadedAt":"createdAt"}}, {upsert : false, multi : true});
+  
+==============
   Mongodb query planning - using explain()
 --------------
   db.collection.find().explain(verbosity) : 
