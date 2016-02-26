@@ -76,6 +76,22 @@ View indexes on a collection 'news'
   db.news_quiz_question.update({}, {$rename:{"editedAt":"updatedAt"}}, {upsert : false, multi : true});
   db.news_quiz_question.update({}, {$rename:{"uploadedAt":"createdAt"}}, {upsert : false, multi : true});
   
+--------------
+==============
+  Mongo update embedded arrays
+--------------
+db.perf item
+{ "_id" : ObjectId("56d017d8a9499e46d2e91404"), "username" : "ashish", "perf" : [ { "quizid" : "q1", "score" : 42 } ] }
+
+//update existing quiz score  
+db.perf.update({username : 'ashish', 'perf.quizid' : 'q1'}, {'$set' : {'perf.$.score' : 42}})
+
+index on username
+db.perf.explain('executionStats').update({username : 'ashish', 'perf.quizid' : 'q2'}, {'$set' : {'perf.$.score' : 100}})
+
+//add new quiz score
+db.perf.update({username : 'hardik'}, {'$push' : {perf : {quizid : 'q5', score : 131}}})
+
 ==============
   Mongodb query planning - using explain()
 --------------
