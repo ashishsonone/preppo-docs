@@ -10,10 +10,10 @@ db.user.createIndex({ username: 1 }, { unique: true})
 ----------
 fetch published news by date
 
-db.news.createIndex({status : 1, publishDate : 1}, {background: true})
+db.news.createIndex({status : 1, publishDate : 1, updatedAt : 1}, {background: true})
 
 a)
-  db.news.find({ publishDate: new Date("Sat, 06 Feb 2016 00:00:00 GMT"), status: 'published' }).sort({status:1, publishDate : 1}).explain('executionStats')
+  db.news.find({ publishDate: new Date("Sat, 06 Feb 2016 00:00:00 GMT"), status: 'published' }).sort({updatedAt : -1}).explain('executionStats')
 
 
 -----------

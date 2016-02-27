@@ -334,3 +334,65 @@ add other members from primary
 connect to replica set:
   mongo --host dummy/localhost:10000,localhost:10001,localhost:10002
 
+
+=================
+REPLICATION WITH 1 PRIMARY, 1 SECONDARY & 1 ARIBITER
+mongod --port 30000 --dbpath primary/  --replSet preppo
+mongod --port 30001 --dbpath secondary/ --replSet preppo
+mongod --port 30002 --dbpath arbiter/ --replSet preppo --nojournal --smallfiles
+
+connect to primary : 
+mongo --port 30000
+> rs.initiate()
+//it becomes primary
+> rs.add('ashish-Inspiron:30001')
+> rs.addArb('ashish-Inspiron:30002')
+
+> rs.status() //see current status, who is primary, secondary and arbiter
+> rs.config() //see configuration
+
+------------------
+
+//to check if secondary is syncing
+insert some data into primary
+> use preppo
+> db.user.insert({'name' : 'ashish'})
+
+connect to secondary
+> use preppo
+> db.getMongo().setSlaveOk() OR rs.slaveOk()
+> db.user.find()
+=================
+
+REPLICATION WITH 1 PRIMARY, 1 SECONDARY(only backup - won't become primary, just to act as data backup, not availability)
+
+mongod --port 30000 --dbpath primary/  --replSet preppo
+mongod --port 30001 --dbpath secondary/ --replSet preppo
+
+connect to primary : 
+mongo --port 30000
+> rs.initiate()
+//it becomes primary
+> rs.add('ashish-Inspiron:30001')
+
+> rs.status() //see current status, who is primary, secondary and arbiter
+> rs.conf() //see configuration
+
+------------------
+make secondary's priority as 0, so it is not longer a candidate for election
+> cfg = rs.conf()
+> cfg.members[1].priority = 0 //members[1] is secondary(ensure it)
+> rs.reconfig(cfg);
+
+------------------
+
+//to check if secondary is syncing
+insert some data into primary
+> use preppo
+> db.user.insert({'name' : 'ashish'})
+
+connect to secondary
+> use preppo
+> db.getMongo().setSlaveOk() OR rs.slaveOk()
+> db.user.find()
+=================
