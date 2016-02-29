@@ -1,10 +1,8 @@
 admin_user table ensure no duplicate email entries
 #RUN db.admin_user.createIndex({email : 1}, {unique : true})
 
----------
-note for unique indexes, don't set backgroud true as its important
-db.user.createIndex({ username: 1 }, { unique: true})
-
+================
+APP API
 ----------
 #TIP : for indexes to be used in queries, like fetching news, set background true
 ----------
@@ -28,8 +26,10 @@ b)
   db.news_quiz.explain('executionStats').find({status : 'published', publishDate : {'$lte' : ISODate("2016-08-11T18:30:00Z")}}, {publishDate : true}).sort({status : -1, publishDate :-1})
 
 ----------
-OTP table
 
+LOGIN
+
+OTP table
 .findOne({
   otp : otp,
   phone : phone,
@@ -41,8 +41,19 @@ db.otp.explain('executionStats').find({otp : 5934, phone : "8976208510", created
 index on {otp : 1, phone : 1, createdAt : 1}
 
 #RUN db.otp.createIndex({otp : 1, phone : 1, createdAt : 1})
+
+*****
+
+User table
+username should be unique
+find user using username during login, signup, password reset
+
+#RUN db.user.createIndex({ username: 1 }, { unique: true})
+
 ----------
 
 random aaj ka sawaal
 #RUN db.random_aaj_ka_sawaal_user.createIndex({phone : 1}, {unique : true})
 #RUN db.random_aaj_ka_sawaal_question.createIndex({publishDate : 1}, {unique : true})
+
+@@@@@@@ applied till here on local, dev and prod mongo servers, please don't update before this
