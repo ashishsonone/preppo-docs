@@ -1,5 +1,5 @@
 admin_user table ensure no duplicate email entries
-db.admin_user.createIndex({email : 1}, {unique : true})
+#RUN db.admin_user.createIndex({email : 1}, {unique : true})
 
 ---------
 note for unique indexes, don't set backgroud true as its important
@@ -10,7 +10,7 @@ db.user.createIndex({ username: 1 }, { unique: true})
 ----------
 fetch published news by date
 
-db.news.createIndex({status : 1, publishDate : 1, updatedAt : 1}, {background: true})
+#RUN db.news.createIndex({status : 1, publishDate : 1, updatedAt : 1}, {background: true})
 
 a)
   db.news.find({ publishDate: new Date("Sat, 06 Feb 2016 00:00:00 GMT"), status: 'published' }).sort({updatedAt : -1}).explain('executionStats')
@@ -19,7 +19,7 @@ a)
 -----------
 
 fetch quiz items ordered publishDate
-db.news_quiz.createIndex({status : 1, publishDate : 1}, {background : true})
+#RUN db.news_quiz.createIndex({status : 1, publishDate : 1}, {background : true})
 
 a)
   db.news_quiz.explain('executionStats').find({status : 'published'}, {publishDate : 1}).sort({status : -1, publishDate :-1})
@@ -28,7 +28,21 @@ b)
   db.news_quiz.explain('executionStats').find({status : 'published', publishDate : {'$lte' : ISODate("2016-08-11T18:30:00Z")}}, {publishDate : true}).sort({status : -1, publishDate :-1})
 
 ----------
+OTP table
+
+.findOne({
+  otp : otp,
+  phone : phone,
+  createdAt : {'$gt' : allowedTime}
+})
+
+db.otp.explain('executionStats').find({otp : 5934, phone : "8976208510", createdAt : {$gt : ISODate("2016-02-29T10:05:46.754Z")}})
+
+index on {otp : 1, phone : 1, createdAt : 1}
+
+#RUN db.otp.createIndex({otp : 1, phone : 1, createdAt : 1})
+----------
 
 random aaj ka sawaal
-db.random_aaj_ka_sawaal_user.createIndex({phone : 1}, {unique : true})
-db.random_aaj_ka_sawaal_question.createIndex({publishDate : 1}, {unique : true})
+#RUN db.random_aaj_ka_sawaal_user.createIndex({phone : 1}, {unique : true})
+#RUN db.random_aaj_ka_sawaal_question.createIndex({publishDate : 1}, {unique : true})

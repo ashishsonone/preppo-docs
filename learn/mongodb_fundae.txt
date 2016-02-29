@@ -365,6 +365,7 @@ connect to secondary
 =================
 
 REPLICATION WITH 1 PRIMARY, 1 SECONDARY(only backup - won't become primary, just to act as data backup, not availability)
+MASTER-SLAVE REPLICATION
 
 mongod --port 30000 --dbpath primary/  --replSet preppo
 mongod --port 30001 --dbpath secondary/ --replSet preppo
@@ -379,11 +380,42 @@ mongo --port 30000
 > rs.conf() //see configuration
 
 ------------------
-make secondary's priority as 0, so it is not longer a candidate for election
+make secondary's priority as 0, votes to 0, so it is not longer a candidate for election, and also cannot cast a vote. Primary alone makes up the majority and can elect itself as primary if connection to secondary fails
+
 > cfg = rs.conf()
 > cfg.members[1].priority = 0 //members[1] is secondary(ensure it)
+> cfg.members[1].votes = 0
 > rs.reconfig(cfg);
 
+rs.conf() now looks like this
+"members" : [
+  {
+    "_id" : 0,
+    "host" : "prod-mongo-1:27017",
+    "arbiterOnly" : false,
+    "buildIndexes" : true,
+    "hidden" : false,
+    "priority" : 1,
+    "tags" : {
+      
+    },
+    "slaveDelay" : NumberLong(0),
+    "votes" : 1
+  },
+  {
+    "_id" : 1,
+    "host" : "prod-mongo-2-secondary:27017",
+    "arbiterOnly" : false,
+    "buildIndexes" : true,
+    "hidden" : false,
+    "priority" : 0,
+    "tags" : {
+      
+    },
+    "slaveDelay" : NumberLong(0),
+    "votes" : 0
+  }
+]
 ------------------
 
 //to check if secondary is syncing
