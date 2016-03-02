@@ -1,0 +1,21 @@
+
+First, Enable cloud loggin api in google cloud
+
+curl -s "https://storage.googleapis.com/signals-agents/logging/google-fluentd-install.sh" | sudo bash
+sudo service google-fluentd restart
+
+Note: Fluentd is automatically configured to collect logs from a variety of common sources. The application is configured to send logs to 'syslog', which is automatically collected by fluentd and rotated by the system.
+
+In supervisor conf : set logfile to 'syslog'
+[program:node]
+command=node /home/ashish/preppo-backend/cluster.js
+directory=/home/ashish/preppo-backend
+autostart=true
+autorestart=true
+startretries=3
+;stderr_logfile=/home/ashish/preppo-backend/logs/nodehook.err.log
+;stdout_logfile=/home/ashish/preppo-backend/logs/nodehook.out.log
+stderr_logfile=syslog
+stdout_logfile=syslog
+user=node
+environment=ENV=dev
