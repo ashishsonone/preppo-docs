@@ -64,3 +64,16 @@
 - cloud logging agent - google logs
 - equation from docx store : mathml or latex
 - use mandrill for mail sending
+
+
+========== new urgent =======
+Backend
+- invite backend
+- quiz api changes - one daily quiz + all weekly and monthly quizzes
+
+Android
+- google signin/signup
+- location
+
+Android bugs
+- after signup - clean activity stack so that back won't take you to ongoin progressbar of login/signup flow

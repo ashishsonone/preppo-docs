@@ -56,4 +56,49 @@ random aaj ka sawaal
 #RUN db.random_aaj_ka_sawaal_user.createIndex({phone : 1}, {unique : true})
 #RUN db.random_aaj_ka_sawaal_question.createIndex({publishDate : 1}, {unique : true})
 
+----------
+
+STATS NEWS QUIZ API
+
+get/put cumulative stats
+
+StatsNewsQuizCumulativeModel
+    .findOne({username : username})
+
+index on 'username'
+
+#RUN db.stats_news_quiz_cumulative.createIndex({username : 1})
+
+*****
+
+get/put single stats
+
+StatsNewsQuizSingleModel
+    .find({
+      username : username, 
+      publishDate :{ '$lte' : ltDateString}
+    })
+    .sort({
+      publishDate : -1
+    })
+#RUN db.stats_news_quiz_single.createIndex({username : 1, publishDate : 1})
+
+StatsNewsQuizSingleModel.findOneAndUpdate(
+    {username :  username, quizId : quizId}
+    )
+
+#RUN db.stats_news_quiz_single.createIndex({username : 1, quizId : 1})
+
+===========
 @@@@@@@ applied till here on local, dev and prod mongo servers, please don't update before this
+===========
+
+index on quiz table updated : earlier on {status, publishDate} => {status, type, publishDate}
+
+#RUN db.news_quiz.dropIndex({status : 1, publishDate : 1})
+#RUN db.news_quiz.createIndex({status : 1, type : 1, publishDate : 1})
+
+
+#todo index on invite
+
+#todo index on monthly digest
