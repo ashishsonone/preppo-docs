@@ -89,16 +89,17 @@ StatsNewsQuizSingleModel.findOneAndUpdate(
 
 #RUN db.stats_news_quiz_single.createIndex({username : 1, quizId : 1})
 
-===========
-@@@@@@@ applied till here on local, dev and prod mongo servers, please don't update before this
-===========
-
+-----------
 index on quiz table updated : earlier on {status, publishDate} => {status, type, publishDate}
 
 #RUN db.news_quiz.dropIndex({status : 1, publishDate : 1})
 #RUN db.news_quiz.createIndex({status : 1, type : 1, publishDate : 1})
 
-
-#todo index on invite
+#todo index on invite ==> ABANDONED invite system
 
 #todo index on monthly digest
+#RUN db.news_monthly_digest.createIndex({publishDate : 1})
+
+===========
+@@@@@@@ applied till here on local, dev and prod mongo servers, please don't update before this
+===========

@@ -38,3 +38,23 @@ Local execution:
 ----------------
 Execute scripts using ssh from gcloud
  gcloud compute ssh dev-node-1 '~/bin/scripts/node_kill.sh'
+
+---------------
+using current timestamp in tag
+
+in .bashrc write
+#TAGSTAMP
+250 export TS="date +%Y-%m-%dT%H:%M"
+
+now tag using
+git tag v27 -m "`$TS` <tag message>"
+
+view all tags sorted using
+git tag -n2 | sort -V
+=============
+tag, push and deploy
+
+assume commited and tagged with 'v24'
+
+  git push origin master; git push origin --tags; git push cloud --tags;
+  gssh-dn1 'cd bin/scripts; ./git_pull.sh; ./node_kill.sh v24'
