@@ -618,6 +618,17 @@ $ gsutil cors set cors.json gs://public-node-1189
 Get cors config on bucket public-node-1189
 $ gsutil cors get gs://public-node-1189
 
+
+--------done for prod preppo----------
+
+gsutil acl set public-read-write gs://public-prod-preppo
+
+gsutil defacl set public-read gs://public-prod-preppo
+
+gsutil cors set ~/Documents/google-cloud-storage-cors.json gs://public-prod-preppo //json file is same as earlier for public-node-1189
+
+gsutil cors get gs://public-node-1189
+
 ------------------
   END GOOGLE CLOUD STORAGE
 ==================

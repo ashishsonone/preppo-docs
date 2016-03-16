@@ -1,0 +1,7 @@
+using https://loader.io
+ashish@preppo.in
+@@8
+
+Free account :
+client limit : 10000 clients per test
+time limit : 1 minute

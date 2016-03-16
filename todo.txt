@@ -68,12 +68,18 @@
 
 ========== new urgent =======
 Backend
-- invite backend
-- quiz api changes - one daily quiz + all weekly and monthly quizzes
+* invite backend
+* quiz api changes - one daily quiz + all weekly and monthly quizzes
 
 Android
-- google signin/signup
-- location
+* google signin/signup
+* location
 
 Android bugs
-- after signup - clean activity stack so that back won't take you to ongoin progressbar of login/signup flow
+* after signup - clean activity stack so that back won't take you to ongoin progressbar of login/signup flow
+
+=============================
+Android:
+- Analytics - add state guards
+
+https://prod.api.preppo.in/v1/app/extra/news/quiz/ratings
