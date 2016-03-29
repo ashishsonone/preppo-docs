@@ -1,0 +1,19 @@
+enable ssh on godaddy hosting
+Generate public/private key pair (remember the passphrase)
+Authorize the key for the account
+
+Download private key godaddy_manager.pem
+
+Change permissions of private key
+  chmod 700 godaddy_manager.pem
+
+ssh -i ~/Documents/godaddy_manager.pem preppo@166.62.27.151
+It will ask for passphrase
+
+scp -i ~/Documents/godaddy_manager.pem preppo@166.62.27.151:~/public_html/home/sitemap.xml .
+
+To use the ssh in scripts so that no prompt for password,
+Remove the passphrase from private key i.e set it to empty ""
+ssh-keygen -p -P "GoDaddy" -N "" -f ~/Documents/godaddy_manager.pem
+
+Now use it : Yay

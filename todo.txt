@@ -80,6 +80,14 @@ Android bugs
 
 =============================
 Android:
-- Analytics - add state guards
+- @dhanesh Swipe action smooth
+(*) Analytics - integrate
+(*) Document notifications types & actions
+(*) Web interface to send notifications
+- @dhanesh Notification click, muliple main activities
+- @dhanesh Why tab transition slow
 
-https://prod.api.preppo.in/v1/app/extra/news/quiz/ratings
+Backend:
+  OPTIONS request 502 error - dhanesh firefox browser
+  find out why DELETE with body not working google load balancer
+  Setup a load balancer locally - so that local & cloud setup are similar

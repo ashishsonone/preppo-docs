@@ -533,6 +533,24 @@ $.ajax({
 });
 
 no xhrFields required
+
+x = $.ajax({
+    type: "GET", 
+    url: "https://prod.api.preppo.in/v1/app/news/?date=2016-03-01", 
+    headers : {'Content-Type': 'application/json'}
+ });
+
+-----------
+way to send application/json data in post request
+
+data = {message : "hi"}
+data = JSON.stringify(data)
+$.ajax({
+  type: "POST", dataType: "json",
+  url: "http://localhost:8002/v1/app/extra/feedback", headers : {'content-type' : 'application/json'},
+  data : data
+});
+
 ------------------
 ==================
 
