@@ -1,0 +1,90 @@
+adb shell am broadcast -a com.android.vending.INSTALL_REFERRER -n preppo.current_affairs/com.localytics.android.ReferralReceiver --es "referrer" "utm_source%3Dother_src31%26utm_medium%3Dm31%26utm_term%3Dt31%26utm_content%3Dc31%26utm_campaign%3DC31%26localytics_test_mode%3Dtrue"
+
+adb shell am broadcast -a com.android.vending.INSTALL_REFERRER -n preppo.current_affairs/com.localytics.android.ReferralReceiver --es "referrer" "utm_source%3Dother_webb%26utm_medium%3Dweb%26utm_term%3Dpreppo%26utm_campaign%3Dtest%2520android%2520campaign%3DC31%26localytics_test_mode%3Dtrue"
+
+http://a.localytics.com/android?id=preppo.current_affairs&referrer=utm_source%3Dother_webb%26utm_medium%3Dweb%26utm_term%3Dpreppo%26utm_campaign%3Dtest%2520android%2520campaign
+
+45 organic, 69 users
+47 organic, 70 users
+
+-----
+
+
+https://play.google.com/store/apps/details?id=preppo.current_affairs&referrer=utm_source%3Dgoogle%26utm_medium%3Dreferral%26utm_term%3Dcurrent%2520affairs%26utm_campaign%3Dpreppo%26anid%3Dadmob
+
+adb shell am broadcast -a com.android.vending.INSTALL_REFERRER -n preppo.current_affairs/preppo.current_affairs.utils.MyReferralReceiver --es "referrer" "utm_source%3Dother_webb%26utm_medium%3Dweb%26utm_term%3Dpreppo%26utm_campaign%3Dtest%2520android%2520campaign"
+
+===========
+
+03-28 23:01:56.995 28874-28874/? I/GAv4: Google Analytics 8.4.87 is starting up. To enable debug logging on a device run:
+                                           adb shell setprop log.tag.GAv4 DEBUG
+                                           adb logcat -s GAv4
+03-28 23:01:57.015 28874-28874/? V/GAv4: Receiver registered. Using alarm for local dispatch.
+03-28 23:01:57.015 28874-28874/? V/GAv4: Network initialized. User agent: GoogleAnalytics/8.4.87 (Linux; U; Android 4.4.2; en-us; ASUS_T00I Build/KVT49L)
+03-28 23:01:57.025 28874-28874/? W/GAv4: CampaignTrackingReceiver is not registered, not exported or is disabled. Installation campaign tracking is not possible. See http://goo.gl/8Rd3yj for instructions.
+03-28 23:01:57.055 28874-28874/? V/GAv4: Loading Tracker config values
+03-28 23:01:57.055 28874-28874/? V/GAv4: trackingId loaded: UA-75676091-1
+03-28 23:01:57.085 28874-28910/? V/GAv4: AnalyticsService registered in the app manifest and enabled
+03-28 23:01:57.445 28874-28910/? V/GAv4: Storing clientId: 6ac25356-312e-4983-a40b-847364945eaf
+03-28 23:01:57.445 28874-28910/? V/GAv4: Loaded clientId: 6ac25356-312e-4983-a40b-847364945eaf
+03-28 23:01:57.495 28874-28910/? D/GAv4: Sending first hit to property: UA-75676091-1
+03-28 23:01:57.495 28874-28910/? D/GAv4: Hit delivery requested: ht=1459186317064, _s=0, _v=ma8.4.87, a=1361974553, aid=preppo.current_affairs, an=Preppo, av=1.0.7, cd=Image~splashscreen, cid=6ac25356-312e-4983-a40b-847364945eaf, sr=480x800, t=screenview, tid=UA-75676091-1, ul=en-us, v=1
+03-28 23:01:57.505 28874-28910/? V/GAv4: Delivering hit: ht=1459186317064, _s=0, _v=ma8.4.87, a=1361974553, aid=preppo.current_affairs, an=Preppo, av=1.0.7, cd=Image~splashscreen, cid=6ac25356-312e-4983-a40b-847364945eaf, sr=480x800, t=screenview, tid=UA-75676091-1, ul=en-us, v=1
+03-28 23:01:57.505 28874-28910/? V/GAv4: Connecting to service
+03-28 23:01:57.535 28874-28910/? V/GAv4: Bind to service requested: true
+03-28 23:01:57.585 28874-28874/? V/GAv4: Bound to IAnalyticsService interface
+03-28 23:01:57.595 28874-28910/? V/GAv4: Connected to service
+03-28 23:01:57.675 28874-28910/? D/GAv4: Hit sent to the device AnalyticsService for delivery
+03-28 23:02:04.725 28874-28874/? V/GAv4: CampaignTrackingReceiver received: com.android.vending.INSTALL_REFERRER
+03-28 23:02:04.745 28874-28874/? V/GAv4: CampaignTrackingService is starting up
+03-28 23:02:04.755 28874-28874/? V/GAv4: CampaignTrackingService called. startId, campaign: 1, utm_source%3Dother_webb%26utm_medium%3Dweb%26utm_term%3Dpreppo%26utm_campaign%3Dtest%2520android%2520campaign%3DC31%26localytics_test_mode%3Dtrue
+03-28 23:02:04.775 28874-28910/? D/GAv4: Received installation campaign
+03-28 23:02:04.785 28874-28910/? D/GAv4: Sending installation campaign to: UA-75676091-1
+03-28 23:02:04.785 28874-28874/? V/GAv4: Install campaign broadcast processed: true
+03-28 23:02:04.785 28874-28874/? V/GAv4: CampaignTrackingService is shutting down
+03-28 23:02:04.815 28874-28910/? D/GAv4: Hit delivery requested: ht=1459186317062, _s=1, _v=ma8.4.87, aid=preppo.current_affairs, an=Preppo, av=1.0.7, cid=6ac25356-312e-4983-a40b-847364945eaf, ni=1, sr=480x800, t=data, tid=UA-75676091-1, ul=en-us, v=1
+03-28 23:02:04.815 28874-28910/? V/GAv4: Delivering hit: ht=1459186317062, _s=1, _v=ma8.4.87, aid=preppo.current_affairs, an=Preppo, av=1.0.7, cid=6ac25356-312e-4983-a40b-847364945eaf, ni=1, sr=480x800, t=data, tid=UA-75676091-1, ul=en-us, v=1
+03-28 23:02:04.835 28874-28910/? D/GAv4: Hit sent to the device AnalyticsService for delivery
+03-28 23:02:14.845 28874-28910/? V/GAv4: Inactivity, disconnecting from device AnalyticsService
+03-28 23:02:14.845 28874-28910/? V/GAv4: Service disconnected
+
+===============
+https://play.google.com/store/apps/details?id=preppo.current_affairs&referrer=utm_source%3Dfb%26utm_medium%3Dreferral%26utm_term%3Dcurrent%2520affairs%26utm_campaign%3Dpreppo
+
+03-29 01:24:27.915 11973-11973/? I/GAv4: Google Analytics 8.4.87 is starting up. To enable debug logging on a device run:
+                                           adb shell setprop log.tag.GAv4 DEBUG
+                                           adb logcat -s GAv4
+03-29 01:24:27.935 11973-11973/? V/GAv4: Receiver registered. Using alarm for local dispatch.
+03-29 01:24:27.935 11973-11973/? V/GAv4: Network initialized. User agent: GoogleAnalytics/8.4.87 (Linux; U; Android 4.4.2; en-us; ASUS_T00I Build/KVT49L)
+03-29 01:24:27.945 11973-11973/? W/GAv4: CampaignTrackingReceiver is not registered, not exported or is disabled. Installation campaign tracking is not possible. See http://goo.gl/8Rd3yj for instructions.
+03-29 01:24:27.965 11973-11973/? V/GAv4: Loading Tracker config values
+03-29 01:24:27.965 11973-11973/? V/GAv4: trackingId loaded: UA-75676091-1
+03-29 01:24:27.985 11973-12003/? V/GAv4: AnalyticsService registered in the app manifest and enabled
+03-29 01:24:28.275 11973-12003/? V/GAv4: Storing clientId: 0d3d3ba2-11d7-454f-b602-f345e0e57876
+03-29 01:24:28.295 11973-12003/? V/GAv4: Loaded clientId: 0d3d3ba2-11d7-454f-b602-f345e0e57876
+03-29 01:24:28.415 11973-12003/? D/GAv4: Sending first hit to property: UA-75676091-1
+03-29 01:24:28.415 11973-12003/? D/GAv4: Hit delivery requested: ht=1459194867977, _s=0, _v=ma8.4.87, a=1369289941, aid=preppo.current_affairs, aiid=com.android.vending, an=Preppo, av=1.1.0, cd=Image~splashscreen, cid=0d3d3ba2-11d7-454f-b602-f345e0e57876, sr=480x800, t=screenview, tid=UA-75676091-1, ul=en-us, v=1
+03-29 01:24:28.425 11973-12003/? V/GAv4: Delivering hit: ht=1459194867977, _s=0, _v=ma8.4.87, a=1369289941, aid=preppo.current_affairs, aiid=com.android.vending, an=Preppo, av=1.1.0, cd=Image~splashscreen, cid=0d3d3ba2-11d7-454f-b602-f345e0e57876, sr=480x800, t=screenview, tid=UA-75676091-1, ul=en-us, v=1
+03-29 01:24:28.425 11973-12003/? V/GAv4: Connecting to service
+03-29 01:24:28.425 11973-12003/? V/GAv4: Bind to service requested: true
+03-29 01:24:28.685 11973-11973/? V/GAv4: Bound to IAnalyticsService interface
+03-29 01:24:28.685 11973-12003/? V/GAv4: Connected to service
+03-29 01:24:28.865 11973-12003/? D/GAv4: Hit sent to the device AnalyticsService for delivery
+03-29 01:24:28.885 11973-11973/? V/GAv4: CampaignTrackingReceiver received: com.android.vending.INSTALL_REFERRER
+03-29 01:24:29.155 11973-11973/? V/GAv4: CampaignTrackingService is starting up
+03-29 01:24:29.155 11973-11973/? V/GAv4: CampaignTrackingService called. startId, campaign: 1, utm_source=fb&utm_medium=referral&utm_term=current%20affairs&utm_campaign=preppo
+03-29 01:24:29.205 11973-12003/? D/GAv4: Received installation campaign: keyword=current affairs, medium=referral, name=preppo, source=fb
+03-29 01:24:29.215 11973-12003/? D/GAv4: Sending installation campaign to: UA-75676091-1, keyword=current affairs, medium=referral, name=preppo, source=fb
+03-29 01:24:29.245 11973-12003/? D/GAv4: Hit delivery requested: ht=1459194867968, _s=1, _v=ma8.4.87, aid=preppo.current_affairs, aiid=com.android.vending, an=Preppo, av=1.1.0, cid=0d3d3ba2-11d7-454f-b602-f345e0e57876, ck=current affairs, cm=referral, cn=preppo, cs=fb, ni=1, sr=480x800, t=data, tid=UA-75676091-1, ul=en-us, v=1
+03-29 01:24:29.245 11973-12003/? V/GAv4: Delivering hit: ht=1459194867968, _s=1, _v=ma8.4.87, aid=preppo.current_affairs, aiid=com.android.vending, an=Preppo, av=1.1.0, cid=0d3d3ba2-11d7-454f-b602-f345e0e57876, ck=current affairs, cm=referral, cn=preppo, cs=fb, ni=1, sr=480x800, t=data, tid=UA-75676091-1, ul=en-us, v=1
+03-29 01:24:29.305 11973-12003/? D/GAv4: Hit sent to the device AnalyticsService for delivery
+03-29 01:24:29.565 11973-11973/? V/GAv4: Install campaign broadcast processed: true
+03-29 01:24:29.565 11973-11973/? V/GAv4: CampaignTrackingService is shutting down
+03-29 01:24:39.305 11973-12003/? V/GAv4: Inactivity, disconnecting from device AnalyticsService
+03-29 01:24:39.305 11973-12003/? V/GAv4: Service disconnected
+03-29 01:25:06.845 12179-12179/? I/GAv4: Google Analytics 7.5.71 is starting up. To enable debug logging on a device run:
+                                           adb shell setprop log.tag.GAv4 DEBUG
+                                           adb logcat -s GAv4
+03-29 01:25:06.915 12179-12179/? V/GAv4: Receiver registered. Using alarm for local dispatch.
+03-29 01:25:06.915 12179-12179/? V/GAv4: Network initialized. User agent: GoogleAnalytics/7.5.71 (Linux; U; Android 4.4.2; en-us; ASUS_T00I Build/KVT49L)
+03-29 01:25:06.925 12179-12193/? V/GAv4: AnalyticsService registered in the app manifest and enabled

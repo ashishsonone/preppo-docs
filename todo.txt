@@ -91,3 +91,5 @@ Backend:
   OPTIONS request 502 error - dhanesh firefox browser
   find out why DELETE with body not working google load balancer
   Setup a load balancer locally - so that local & cloud setup are similar
+
+http://developer.android.com/reference/android/graphics/drawable/VectorDrawable.html not found
