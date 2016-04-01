@@ -1,0 +1,9 @@
+Look at alarms set:
+  adb shell dumpsys alarm | less
+  Search for 'preppo' (package name)
+
+  Refer following to understand what the output means
+  http://stackoverflow.com/questions/28742884/how-to-read-adb-shell-dumpsys-alarm-output
+
+Understand services, threads, looper:
+  https://github.com/codepath/android_guides/wiki/Managing-Threads-and-Custom-Services
